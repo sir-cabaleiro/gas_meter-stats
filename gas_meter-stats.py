@@ -1,42 +1,61 @@
 import paramiko
-import time
-from datetime import datetime
+import datetime
+import json
 
-HOST = "185.254.204.239"
+now = datetime.datetime.now()
+mes = str(now.month)
+dia = int(now.day)
+hora = int(now.hour)
+minuto = int(now.minute)
+ahora = {"dia": dia, "hora": hora, "minuto": minuto}
+HOST = ""
 USER = "root"
-local = "gas.json"
+PORT = ""
+local = 'C:/Users/adri/Desktop/gas/' + mes + '.json'
 remote = ""
 
-if __name__ == '__main__':
+def archivo_json():
+    with open(local) as archivo:
+        data = json.load(archivo)
+        temp = data["dias"]
+        temp.append(ahora)
+        print(data)
+
+    with open(local, 'w') as archivo:
+        json.dump(data, archivo)
+
+def conexion():
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy( paramiko.AutoAddPolicy() )
-    try: 
-        client.connect(HOST, username=USER, password='')
-
-        stdin, stdout, stderr = client.exec_command('ls')
-        time.sleep(1)
-        result = stdout.read().decode()
-        print(result)
+    try:
+        client.connect(HOST, port=PORT, username=USER, password='')
 
         sftp = client.open_sftp()
 
-        try: 
+        try:
             sftp.put(local,remote)
             print("subido :)")
         except:
-            print("cmamut :(")
+            print("cmamut, no subido :(")
 
         client.close()
 
-    
     except:
         print('no se conectó :(')
 
 
+if __name__ == '__main__':
+    archivo_json()
+    conexion()
+
+
     
 
 
+#   antes de añadir la linea en el json pruedo mirar si el contador ha cambiado respecto a los 5 minutos anteriores
 
-#   consumo = Xm3 * 11.0519
+#   consumo = m3 * 11.0519
 
-# JSON '{"mes":"11", "dia":24, "hora":17, "minuto":"11",}'
+
+
+
