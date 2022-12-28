@@ -1,18 +1,29 @@
-#from picamera import PiCamera
+from picamera import PiCamera
+import RPi.GPIO as GPIO
 import pytesseract as tess
 from PIL import Image
 import paramiko
 import datetime
 import json
+import time
 
 
-#camera = PiCamera()
+def captura_contador() :
+    pin = 7
+    camera = PiCamera()
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.HIGH)
+    camera.capture('file directory.jpg')
+    GPIO.output(pin, GPIO.LOW)
+
+
 
 def leer_contador() :
     global contador
 
-    tess.pytesseract.tesseract_cmd = r'<<ruta tesseract>>'
-    my_image = Image.open(r'<<ruta imagen>>')
+    tess.pytesseract.tesseract_cmd = r'tesseract-dir\tesseract.exe'
+    my_image = Image.open('file directory.jpg')
     
     contador = tess.image_to_string(my_image, lang='eng', config='--psm 10 --oem 3 -c tessedit_char_whitelist=0123456789')
     contador = contador[:-1]
@@ -47,8 +58,8 @@ def archivo_json():
     global local
     global remote
 
-    local = '<<ruta local>>/' + mes + '.json'
-    remote = "<<ruta remota>>/" + mes + ".json"
+    local = 'file directory' + mes + '.json'
+    remote = "file directory" + mes + ".json"
 
     with open(local) as archivo:
         data = json.load(archivo)
@@ -60,7 +71,7 @@ def archivo_json():
         json.dump(data, archivo)
 
 def conexion():
-    HOST = "ip host"
+    HOST = "host"
     USER = "user"
     PORT = "port"
 
@@ -86,23 +97,16 @@ def conexion():
 
 if __name__ == '__main__':
     try:
+        captura_contador()
+        time.sleep(60)
         leer_contador()
         comprobacion()
     except:
         print("Lectura no tomada")
         exit()
-    
-    resultado()
+
     archivo_json()
     conexion()
-
-
-    
-
-
-#   antes de añadir la linea en el json pruedo mirar si el contador ha cambiado respecto a los 5 minutos anteriores
-
-#   consumo = m3 * 11.0519
 
 
 
